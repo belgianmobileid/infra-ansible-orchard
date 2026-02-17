@@ -16,4 +16,12 @@ macs:
     ansible_user_vms: admin
     github_macos_runner_tar_file_url: https://github.com/actions/runner/releases/download/v2.331.0/actions-runner-osx-arm64-2.331.0.tar.gz
     github_url: https://github.com/belgianmobileid
-    github_token: ANGX25YKJJIO5XZ3AMGFYC3JQIQG4
+    github_token: ANGX25324NSHQABFKOHGHXTJSSNYI
+    github_runner_group: mobile-squad
+    github_runner_labels: mobile-squad-runners-macminis-macos-tahoe-xcode
+    github_runner_name: mobile-squad-runners-macminis-macos-tahoe-xcode-02
+    admins:
+    - yannickkint
+    - kevinclymans
+    - geoffreymartens
+    - arnobiesmans

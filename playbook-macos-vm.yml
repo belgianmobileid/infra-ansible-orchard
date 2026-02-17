@@ -20,10 +20,11 @@
         name: "{{ item }}"
         state: upgraded
       loop:
-        - "xcodesorg/made/xcodes"
+        - "xcodes"
         - "mint"
         - "xcodegen"
     - name: Allow admin user to use sudo passwordless
+      become: true
       ansible.builtin.lineinfile :
         path: "/etc/sudoers.d/{{ ansible_user_vms }}"
         state: present
@@ -31,6 +32,7 @@
         validate: "visudo -cf %s"
         create: yes
     - name: SSH-Disable password login
+      become: true
       ansible.builtin.lineinfile:
         dest: /etc/ssh/sshd_config
         regexp: '^(#\s*)?PasswordAuthentication yes'
@@ -38,39 +40,44 @@
       notify: reload_sshd
     - name: Add public keys for admin user
       ansible.posix.authorized_key:
-        user: "{{ admin_user }}"
+        user: "{{ ansible_user_vms }}"
         key: "{{ lookup('file', 'admin_keys/{{ item }}.pub') }}"
       with_items: "{{ admins }}"
       loop_control:
         label: "{{ item }}"
     - name: Remove directory actions-runner
       ansible.builtin.file:
-        path: /actions-runner
+        path: "/Users/{{ ansible_user_vms }}/actions-runner"
         state: absent
     - name: Recreate actions-runner directory
       ansible.builtin.file:
-        path: /actions-runner
+        path: "/Users/{{ ansible_user_vms }}/actions-runner"
         state: directory
     - name: "Download github runner tar file"
       ansible.builtin.get_url:
         url: "{{ github_macos_runner_tar_file_url }}"
-        dest: "/actions-runner/actions-runner-osx.tar.gz"
+        dest: "/Users/{{ ansible_user_vms }}/actions-runner/actions-runner-osx.tar.gz"
         mode: '0644'
     - name: "Extract github runner tar file"
-      ansible.builtin.unarchive:
-        src: "/actions-runner/actions-runner-osx.tar.gz"
-        dest: "/actions-runner"
-        remote_src: yes
+      ansible.builtin.command:
+        cmd: "tar -xzf ./actions-runner-osx.tar.gz"
+        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
     - name: "Configure github runner"
       ansible.builtin.command:
-        cmd: "./config.sh --url {{ github_url }} --token {{ github_token }}"
-        chdir: "/actions-runner"
-        creates: "/actions-runner/.runner"
+        cmd: "./config.sh --unattended --url {{ github_url }} --token {{ github_token }} --name {{ github_runner_name }} --runnergroup {{ github_runner_group }} --labels {{ github_runner_labels }}"
+        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
+        creates: "/Users/{{ ansible_user_vms }}/actions-runner/.runner"
     - name: "Configure github runner as service"
       ansible.builtin.command:
         cmd: "./svc.sh install"
-        chdir: "/actions-runner"
+        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
     - name: "Start github runner service"
       ansible.builtin.command:
         cmd: "./svc.sh start"
-        chdir: "/actions-runner"
+        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
+  
+  handlers:
+  - name: reload_sshd
+    ansible.builtin.service:
+      name: ssh
+      state: reload
