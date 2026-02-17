@@ -1,21 +1,74 @@
-- name: Command Line Tools
-  hosts: workers
-  roles:
-    - { role: elliotweiser.osx-command-line-tools }
-
 - name: Install Homebrew
-  hosts: workers
+  hosts: vms
   roles:
     - geerlingguy.mac.homebrew
 
-- hosts: workers
+- hosts: vms
   tasks:
     - name: Update and upgrade Homebrew packages
       homebrew:
         update_homebrew: true
         upgrade_all: true
-
-- name: Orchard Worker Service
-  hosts: workers
-  roles:
-    - role: orchard-worker-service
+    - name: Uninstall old packages via Homebrew
+      homebrew:
+        name: xcodes
+        state: absent
+    - name: Install new packages via Homebrew
+      homebrew:
+        name: "{{ item }}"
+        state: upgraded
+      loop:
+        - "xcodesorg/made/xcodes"
+        - "mint"
+        - "xcodegen"
+    - name: Allow admin user to use sudo passwordless
+      ansible.builtin.lineinfile :
+        path: "/etc/sudoers.d/{{ admin_user }}"
+        state: present
+        line: "{{ admin_user }} ALL=(ALL) NOPASSWD: ALL"
+        validate: "visudo -cf %s"
+        create: yes
+    - name: SSH-Disable password login
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^(#\s*)?PasswordAuthentication yes'
+        line: "PasswordAuthentication no"
+      notify: reload_sshd
+    - name: Add public keys for admin user
+      ansible.posix.authorized_key:
+        user: "{{ admin_user }}"
+        key: "{{ lookup('file', 'admin_keys/{{ item }}.pub') }}"
+      with_items: "{{ admins }}"
+      loop_control:
+        label: "{{ item }}"
+    - name: Remove directory actions-runner
+      ansible.builtin.file:
+        path: /actions-runner
+        state: absent
+    - name: Recreate actions-runner directory
+      ansible.builtin.file:
+        path: /actions-runner
+        state: directory
+    - name: "Download github runner tar file"
+      ansible.builtin.get_url:
+        url: "{{ github_macos_runner_tar_file_url }}"
+        dest: "/actions-runner/actions-runner-osx.tar.gz"
+        mode: '0644'
+    - name: "Extract github runner tar file"
+      ansible.builtin.unarchive:
+        src: "/actions-runner/actions-runner-osx.tar.gz"
+        dest: "/actions-runner"
+        remote_src: yes
+    - name: "Configure github runner"
+      ansible.builtin.command:
+        cmd: "./config.sh --url {{ github_url }} --token {{ github_token }}"
+        chdir: "/actions-runner"
+        creates: "/actions-runner/.runner"
+    - name: "Configure github runner as service"
+      ansible.builtin.command:
+        cmd: "./svc.sh install"
+        chdir: "/actions-runner"
+    - name: "Start github runner service"
+      ansible.builtin.command:
+        cmd: "./svc.sh start"
+        chdir: "/actions-runner"
