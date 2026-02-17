@@ -1,14 +1,17 @@
 - name: Command Line Tools
   hosts: workers
+  remote_user: {{ ansible_user_workers }}
   roles:
     - { role: elliotweiser.osx-command-line-tools }
 
 - name: Install Homebrew
   hosts: workers
+  remote_user: {{ ansible_user_workers }}
   roles:
     - geerlingguy.mac.homebrew
 
 - hosts: workers
+  remote_user: {{ ansible_user_workers }}
   tasks:
     - name: Update and upgrade Homebrew packages
       homebrew:
@@ -17,5 +20,6 @@
 
 - name: Orchard Worker Service
   hosts: workers
+  remote_user: {{ ansible_user_workers }}
   roles:
     - role: orchard-worker-service

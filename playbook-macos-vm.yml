@@ -1,9 +1,11 @@
 - name: Install Homebrew
   hosts: vms
+  remote_user: {{ ansible_user_vms }}
   roles:
     - geerlingguy.mac.homebrew
 
 - hosts: vms
+  remote_user: {{ ansible_user_vms }}
   tasks:
     - name: Update and upgrade Homebrew packages
       homebrew:
@@ -23,9 +25,9 @@
         - "xcodegen"
     - name: Allow admin user to use sudo passwordless
       ansible.builtin.lineinfile :
-        path: "/etc/sudoers.d/{{ admin_user }}"
+        path: "/etc/sudoers.d/{{ ansible_user_vms }}"
         state: present
-        line: "{{ admin_user }} ALL=(ALL) NOPASSWD: ALL"
+        line: "{{ ansible_user_vms }} ALL=(ALL) NOPASSWD: ALL"
         validate: "visudo -cf %s"
         create: yes
     - name: SSH-Disable password login
