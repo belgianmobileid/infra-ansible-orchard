@@ -1,10 +1,10 @@
 - name: Install Homebrew
-  hosts: vms
+  hosts: macos-vms
   remote_user: "{{ ansible_user }}"
   roles:
     - geerlingguy.mac.homebrew
 
-- hosts: vms
+- hosts: macos-vms
   remote_user: "{{ ansible_user }}"
   tasks:
     - name: Update and upgrade Homebrew packages
