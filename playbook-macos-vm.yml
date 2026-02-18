@@ -1,11 +1,11 @@
 - name: Install Homebrew
   hosts: vms
-  remote_user: "{{ ansible_user_vms }}"
+  remote_user: "{{ ansible_user }}"
   roles:
     - geerlingguy.mac.homebrew
 
 - hosts: vms
-  remote_user: "{{ ansible_user_vms }}"
+  remote_user: "{{ ansible_user }}"
   tasks:
     - name: Update and upgrade Homebrew packages
       homebrew:
@@ -23,12 +23,16 @@
         - "xcodes"
         - "mint"
         - "xcodegen"
+    - name: Change password admin user
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        password: "{{ 'ansible_user_password' | password_hash('sha512') }}"
     - name: Allow admin user to use sudo passwordless
       become: true
       ansible.builtin.lineinfile :
-        path: "/etc/sudoers.d/{{ ansible_user_vms }}"
+        path: "/etc/sudoers.d/{{ ansible_user }}"
         state: present
-        line: "{{ ansible_user_vms }} ALL=(ALL) NOPASSWD: ALL"
+        line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
         validate: "visudo -cf %s"
         create: yes
     - name: SSH-Disable password login
@@ -40,41 +44,41 @@
       notify: reload_sshd
     - name: Add public keys for admin user
       ansible.posix.authorized_key:
-        user: "{{ ansible_user_vms }}"
+        user: "{{ ansible_user }}"
         key: "{{ lookup('file', 'admin_keys/{{ item }}.pub') }}"
       with_items: "{{ admins }}"
       loop_control:
         label: "{{ item }}"
     - name: Remove directory actions-runner
       ansible.builtin.file:
-        path: "/Users/{{ ansible_user_vms }}/actions-runner"
+        path: "/Users/{{ ansible_user }}/actions-runner"
         state: absent
     - name: Recreate actions-runner directory
       ansible.builtin.file:
-        path: "/Users/{{ ansible_user_vms }}/actions-runner"
+        path: "/Users/{{ ansible_user }}/actions-runner"
         state: directory
     - name: "Download github runner tar file"
       ansible.builtin.get_url:
         url: "{{ github_macos_runner_tar_file_url }}"
-        dest: "/Users/{{ ansible_user_vms }}/actions-runner/actions-runner-osx.tar.gz"
+        dest: "/Users/{{ ansible_user }}/actions-runner/actions-runner-osx.tar.gz"
         mode: '0644'
     - name: "Extract github runner tar file"
       ansible.builtin.command:
         cmd: "tar -xzf ./actions-runner-osx.tar.gz"
-        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
+        chdir: "/Users/{{ ansible_user }}/actions-runner"
     - name: "Configure github runner"
       ansible.builtin.command:
         cmd: "./config.sh --unattended --url {{ github_url }} --token {{ github_token }} --name {{ github_runner_name }} --runnergroup {{ github_runner_group }} --labels {{ github_runner_labels }}"
-        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
-        creates: "/Users/{{ ansible_user_vms }}/actions-runner/.runner"
+        chdir: "/Users/{{ ansible_user }}/actions-runner"
+        creates: "/Users/{{ ansible_user }}/actions-runner/.runner"
     - name: "Configure github runner as service"
       ansible.builtin.command:
         cmd: "./svc.sh install"
-        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
+        chdir: "/Users/{{ ansible_user }}/actions-runner"
     - name: "Start github runner service"
       ansible.builtin.command:
         cmd: "./svc.sh start"
-        chdir: "/Users/{{ ansible_user_vms }}/actions-runner"
+        chdir: "/Users/{{ ansible_user }}/actions-runner"
   
   handlers:
   - name: reload_sshd

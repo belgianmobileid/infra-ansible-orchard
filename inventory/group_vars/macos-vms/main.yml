@@ -1,0 +1,10 @@
+ansible_user: admin
+ansible_user_password: FcUv2n19SLPb
+github_macos_runner_tar_file_url: https://github.com/actions/runner/releases/download/v2.331.0/actions-runner-osx-arm64-2.331.0.tar.gz
+github_url: https://github.com/belgianmobileid
+github_runner_group: mobile-squad
+admins:
+  - yannickkint
+  - kevinclymans
+  - geoffreymartens
+  - arnobiesmans

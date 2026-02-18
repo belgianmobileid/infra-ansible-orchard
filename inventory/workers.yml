@@ -1,0 +1,2 @@
+[workers]
+Mac-Mini-Master-01.local ansible_host=127.0.0.1
