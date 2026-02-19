@@ -36,7 +36,7 @@
       become: true
       ansible.builtin.lineinfile:
         dest: /etc/ssh/sshd_config
-        regexp: '^(#\s*)?PasswordAuthentication yes'
+        regexp: '^(#\s*)?PasswordAuthentication '
         line: "PasswordAuthentication no"
       notify: reload_sshd
     - name: Add public keys for admin user
