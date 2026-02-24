@@ -24,6 +24,7 @@
         - "xcodes"
         - "mint"
         - "xcodegen"
+        - "git-lfs"
     - name: Allow admin user to use sudo passwordless
       become: true
       ansible.builtin.lineinfile :
