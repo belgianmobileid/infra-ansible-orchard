@@ -1,0 +1,57 @@
+#!/bin/bash
+HOSTNAME=""
+RUNNER_GROUP=""
+RUNNER_LABELS=""
+GITHUB_TOKEN=""
+ADMIN_SSH_AUTHORIZED_KEYS=""
+ADMIN_PASSWORD=""
+PATH="/opt/homebrew/bin/:$PATH"
+
+# set ssh keys for admin user
+echo $ADMIN_SSH_AUTHORIZED_KEYS >> /Users/admin/.ssh/authorized_keys
+
+# no password authentication via ssh
+sudo echo "PasswordAuthentication no" >> /etc/ssh/sshd_config.d/00-disable-passwords.conf
+
+# update & upgrade brew packages
+/opt/homebrew/bin/brew update && /opt/homebrew/bin/brew upgrade
+
+# uninstall default unecessary packages from brew
+/opt/homebrew/bin/brew uinstall xcodes
+
+# install necessary packages with brew
+if [[ $(command -v brew) == "" ]]; then
+    echo "📦 Homebrew command not detected -> Installing Homebrew"
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+    echo "📦 Homebrew already installed ✅"
+fi
+for package in xcodes mint xcodesorg/made/xcodes git-lfs coreutils azure-cli
+do
+    if ! brew list $package &> /dev/null; then
+        echo "📦 Homebrew $package is not installed. Installing now..."
+        brew install $package
+    else
+        echo "📦 Homebrew $package is already installed ✅"
+    fi
+done
+
+# allow admin user to use sudo passwordless
+sudo echo "admin ALL=(ALL) NOPASSWD: ALL" >> /private/etc/sudoers.d/admin
+
+if ! -d /Users/admin/actions-runner/.runner; then
+    # recreate empty  action-runners directory
+    /bin/rm -rf /Users/admin/actions-runner && /bin/mkdir /Users/admin/actions-runner 
+    # download runner config
+    cd /Users/admin/actions-runner && curl -o actions-runner-osx-arm64-2.331.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.331.0/actions-runner-osx-arm64-2.331.0.tar.gz && /usr/bin/tar xzf ./actions-runner-osx-arm64-2.331.0.tar.gz
+    # run runner config
+    /Users/admin/actions-runner/config.sh --unattended --url https://github.com/belgianmobileid --token $GITHUBTOKEN --name $HOSTNAME --runnergroup $RUNNGERGROUP --labels $RUNNERLABELS
+    # install github runner as service and run
+    /Users/admin/actions-runner/svc.sh install && /Users/admin/actions-runner/svc.sh start
+fi
+
+# change admin password
+/usr/bin/dscl . -passwd /Users/admin admin $ADMIN_PASSWORD
+
+# reboot vm
+sudo /sbin/shutdown -r now 
