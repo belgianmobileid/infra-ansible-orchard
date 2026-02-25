@@ -8,10 +8,10 @@ ADMIN_PASSWORD="<PLACEHOLDER>"
 PATH="/opt/homebrew/bin/:$PATH"
 
 # set ssh keys for admin user
-echo $ADMIN_SSH_AUTHORIZED_KEYS >> /Users/admin/.ssh/authorized_keys
+echo $ADMIN_SSH_AUTHORIZED_KEYS | sudo tee -a /Users/admin/.ssh/authorized_keys
 
 # no password authentication via ssh
-sudo echo "PasswordAuthentication no" >> /etc/ssh/sshd_config.d/00-disable-passwords.conf
+echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config.d/00-disable-passwords.conf
 
 # update & upgrade brew packages
 /opt/homebrew/bin/brew update && /opt/homebrew/bin/brew upgrade
@@ -35,9 +35,6 @@ do
         echo "📦 Homebrew $package is already installed ✅"
     fi
 done
-
-# allow admin user to use sudo passwordless
-sudo echo "admin ALL=(ALL) NOPASSWD: ALL" >> /private/etc/sudoers.d/admin
 
 if ! -d /Users/admin/actions-runner/.runner; then
     # recreate empty  action-runners directory
