@@ -13,12 +13,6 @@ echo $ADMIN_SSH_AUTHORIZED_KEYS | sudo tee -a /Users/admin/.ssh/authorized_keys
 # no password authentication via ssh
 echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config.d/00-disable-passwords.conf
 
-# update & upgrade brew packages
-/opt/homebrew/bin/brew update && /opt/homebrew/bin/brew upgrade
-
-# uninstall default unecessary packages from brew
-/opt/homebrew/bin/brew uinstall xcodes
-
 # install necessary packages with brew
 if [[ $(command -v brew) == "" ]]; then
     echo "📦 Homebrew command not detected -> Installing Homebrew"
@@ -26,6 +20,13 @@ if [[ $(command -v brew) == "" ]]; then
 else
     echo "📦 Homebrew already installed ✅"
 fi
+
+# update & upgrade brew packages
+/opt/homebrew/bin/brew update && /opt/homebrew/bin/brew upgrade
+
+# uninstall default unecessary packages from brew
+/opt/homebrew/bin/brew uinstall xcodes
+
 for package in xcodes mint xcodesorg/made/xcodes git-lfs coreutils azure-cli
 do
     if ! brew list $package &> /dev/null; then
