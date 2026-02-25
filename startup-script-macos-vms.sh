@@ -2,7 +2,7 @@
 HOSTNAME="<PLACEHOLDER>"
 RUNNER_GROUP="<PLACEHOLDER>"
 RUNNER_LABELS="<PLACEHOLDER>"
-GITHUB_TOKEN=""<PLACEHOLDER>
+GITHUB_PAT="<PLACEHOLDER>"
 ADMIN_SSH_AUTHORIZED_KEYS="<PLACEHOLDER>"
 ADMIN_PASSWORD="<PLACEHOLDER>"
 PATH="/opt/homebrew/bin/:$PATH"
@@ -44,6 +44,8 @@ if ! -d /Users/admin/actions-runner/.runner; then
     /bin/rm -rf /Users/admin/actions-runner && /bin/mkdir /Users/admin/actions-runner 
     # download runner config
     cd /Users/admin/actions-runner && curl -o actions-runner-osx-arm64-2.331.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.331.0/actions-runner-osx-arm64-2.331.0.tar.gz && /usr/bin/tar xzf ./actions-runner-osx-arm64-2.331.0.tar.gz
+    # retrieve runner token
+    GITHUBTOKEN = $(curl -k -X POST -H "Authorization: Bearer $GITHUB_PAT" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/orgs/belgianmobileid/actions/runners/registration-token | jq -r .token)
     # run runner config
     /Users/admin/actions-runner/config.sh --unattended --url https://github.com/belgianmobileid --token $GITHUBTOKEN --name $HOSTNAME --runnergroup $RUNNGERGROUP --labels $RUNNERLABELS
     # install github runner as service and run
