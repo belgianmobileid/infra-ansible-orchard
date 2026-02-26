@@ -7,12 +7,13 @@ ADMIN_SSH_AUTHORIZED_KEYS="<PLACEHOLDER>"
 ADMIN_PASSWORD="<PLACEHOLDER>"
 PATH="/opt/homebrew/bin/:$PATH"
 
+echo "############ BEGIN SCRIPT ##########"
 # set ssh keys for admin user
 echo $ADMIN_SSH_AUTHORIZED_KEYS | sudo tee -a /Users/admin/.ssh/authorized_keys
 
 # no password authentication via ssh
 echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config.d/00-disable-passwords.conf
-
+echo "############ STAP 1 ##########"
 # install necessary packages with brew
 if [[ $(command -v brew) == "" ]]; then
     echo "📦 Homebrew command not detected -> Installing Homebrew"
@@ -20,13 +21,13 @@ if [[ $(command -v brew) == "" ]]; then
 else
     echo "📦 Homebrew already installed ✅"
 fi
-
+echo "############ STAP 2 ##########"
 # update & upgrade brew packages
 /opt/homebrew/bin/brew update && /opt/homebrew/bin/brew upgrade
 
 # uninstall default unecessary packages from brew
-/opt/homebrew/bin/brew uinstall xcodes
-
+/opt/homebrew/bin/brew uninstall xcodes
+echo "############ STAP 3 ##########"
 for package in xcodes mint xcodesorg/made/xcodes git-lfs coreutils
 do
     if ! brew list $package &> /dev/null; then
@@ -36,6 +37,8 @@ do
         echo "📦 Homebrew $package is already installed ✅"
     fi
 done
+
+echo "############ STAP 4 ##########"
 
 # recreate empty  action-runners directory
 /bin/rm -rf /Users/admin/actions-runner && /bin/mkdir /Users/admin/actions-runner 
@@ -48,8 +51,9 @@ GITHUBTOKEN=$(curl -k -X POST -H "Authorization: Bearer $GITHUB_PAT" -H "Accept:
 # install github runner as service and run
 /Users/admin/actions-runner/svc.sh install && /Users/admin/actions-runner/svc.sh start
 
+echo "############ STAP 5 ##########"
+
 # # change admin password
 /usr/bin/dscl . -passwd /Users/admin admin $ADMIN_PASSWORD
 
-# # reboot vm
-sudo /sbin/shutdown -r now 
+echo "############ EINDE SCRIPT ##########"
