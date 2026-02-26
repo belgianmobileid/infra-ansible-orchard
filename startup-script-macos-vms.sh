@@ -19,17 +19,16 @@ curl -o actions-runner-osx-arm64-2.331.0.tar.gz -L https://github.com/actions/ru
 /usr/bin/tar xzf ./actions-runner-osx-arm64-2.331.0.tar.gz
 
 # retrieve runner token
-GITHUBTOKEN=$(curl -k -X POST -H "Authorization: Bearer $GITHUB_PAT" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/orgs/belgianmobileid/actions/runners/registration-token | jq -r .token)
-
+GITHUB_TOKEN=$(curl -k -X POST -H "Authorization: Bearer $GITHUB_PAT" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/orgs/belgianmobileid/actions/runners/registration-token | jq -r .token)
 # run runner config
-/Users/admin/actions-runner/config.sh --unattended --url https://github.com/belgianmobileid --token $GITHUBTOKEN --name $HOSTNAME --runnergroup $RUNNGERGROUP --labels $RUNNERLABELS --replace
-
+/Users/admin/actions-runner/config.sh --unattended --url https://github.com/belgianmobileid --token $GITHUB_TOKEN --name $HOSTNAME --runnergroup $RUNNER_GROUP --labels $RUNNER_LABELS --replace
 # install github runner as service and run
 /Users/admin/actions-runner/svc.sh install
 /Users/admin/actions-runner/svc.sh start
 
-# change admin password
-/usr/bin/dscl . -passwd /Users/admin admin $ADMIN_PASSWORD
+# ssh configuration
+echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config.d/00-disable-passwords.conf
+echo $ADMIN_SSH_AUTHORIZED_KEYS | sudo tee -a /Users/admin/.ssh/authorized_keys
 
 # install necessary packages with brew
 if [[ $(command -v brew) == "" ]]; then
@@ -38,20 +37,35 @@ if [[ $(command -v brew) == "" ]]; then
 else
     echo "📦 Homebrew already installed ✅"
 fi
-
 # update brew 
-brew update
+brew update 
 
-# uninstall and install packages from brew
-brew uninstall xcodes
-brew install mint 
-brew install xcodesorg/made/xcodes 
-brew install git-lfs 
-brew install coreutils
-
-# ssh configuration
-echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config.d/00-disable-passwords.conf
-echo $ADMIN_SSH_AUTHORIZED_KEYS | sudo tee -a /Users/admin/.ssh/authorized_keys
+if ! brew list mint &> /dev/null; then
+    echo "📦 Homebrew mint is not installed. Installing now..."
+    brew install mint
+else
+    echo "📦 Homebrew mint is already installed ✅"
+fi
+if ! brew list coreutils &> /dev/null; then
+    echo "📦 Homebrew coreutils is not installed. Installing now..."
+    brew install coreutils
+else
+    echo "📦 Homebrew coreutils is already installed ✅"
+fi
+if [[ $(command -v `brew list | grep lfs`) == "" ]]; then
+    echo "📦 Installing git-lfs dependency"
+    brew install git-lfs
+    echo "📦 Pulling lfs data"
+    git lfs pull
+else
+    echo "📦 git-lfs already installed ✅"
+fi
+if [[ $(command -v `brew list | grep xcodes`) == "" ]]; then
+    echo "📦 Installing xcodes dependency"
+    brew install xcodesorg/made/xcodes
+else
+    echo "📦 xcodes already installed ✅"
+fi
 
 # change admin password
 /usr/bin/dscl . -passwd /Users/admin admin $ADMIN_PASSWORD
