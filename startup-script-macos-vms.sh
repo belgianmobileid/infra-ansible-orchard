@@ -47,17 +47,17 @@ echo "############ STAP 5 ##########"
 cd /Users/admin/actions-runner && curl -o actions-runner-osx-arm64-2.331.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.331.0/actions-runner-osx-arm64-2.331.0.tar.gz && /usr/bin/tar xzf ./actions-runner-osx-arm64-2.331.0.tar.gz
 echo "############ STAP 6 ##########"
 # retrieve runner token
-GITHUBTOKEN=$(curl -k -X POST -H "Authorization: Bearer $GITHUB_PAT" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/orgs/belgianmobileid/actions/runners/registration-token | jq -r .token)
+#GITHUBTOKEN=$(curl -k -X POST -H "Authorization: Bearer $GITHUB_PAT" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/orgs/belgianmobileid/actions/runners/registration-token | jq -r .token)
 echo "############ STAP 7 ##########"
 # run runner config
-/Users/admin/actions-runner/config.sh --unattended --url https://github.com/belgianmobileid --token $GITHUBTOKEN --name $HOSTNAME --runnergroup $RUNNGERGROUP --labels $RUNNERLABELS --replace
+#/Users/admin/actions-runner/config.sh --unattended --url https://github.com/belgianmobileid --token $GITHUBTOKEN --name $HOSTNAME --runnergroup $RUNNGERGROUP --labels $RUNNERLABELS --replace
 echo "############ STAP 8 ##########"
 # install github runner as service and run
-/Users/admin/actions-runner/svc.sh install && /Users/admin/actions-runner/svc.sh start
+#/Users/admin/actions-runner/svc.sh install && /Users/admin/actions-runner/svc.sh start
 
 echo "############ STAP 9 ##########"
 
 # # change admin password
-/usr/bin/dscl . -passwd /Users/admin admin $ADMIN_PASSWORD
+#/usr/bin/dscl . -passwd /Users/admin admin $ADMIN_PASSWORD
 
 echo "############ EINDE SCRIPT ##########"
