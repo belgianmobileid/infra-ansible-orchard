@@ -8,5 +8,7 @@ macs:
   vars:
     ansible_user_workers: macmini
     orchard_worker_user: macmini # change if necessary
-    orchard_worker_controller_url: https://orchard.prd.itsme.services:443
+    orchard_controller_ip: "10.10.81.200"
+    orchard_controller_host: "orchard.prd.itsme.internal"
+    orchard_worker_controller_url: https://orchard.prd.itsme.internal:443
     orchard_worker_bootstrap_token: <PLACEHOLDER>
