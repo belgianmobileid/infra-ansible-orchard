@@ -1,10 +1,13 @@
-- name: Add controller host url to /etc/hosts
-  ansible.builtin.lineinfile:
-    path: /etc/hosts
-    line: "{{ orchard_controller_ip }} {{ orchard_controller_host | regex_escape }}"
-    regexp: '^.* {{ orchard_controller_host | regex_escape }}$'
-    state: present
-  become: true
+- hosts: workers
+  remote_user: "{{ ansible_user_workers }}"
+  tasks:
+  - name: Add controller host url to /etc/hosts
+    ansible.builtin.lineinfile:
+      path: /etc/hosts
+      line: "{{ orchard_controller_ip }} {{ orchard_controller_host }}"
+      regexp: '^.* {{ orchard_controller_host }}$'
+      state: present
+    become: true
 
 - name: Command Line Tools
   hosts: workers
