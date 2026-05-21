@@ -7,6 +7,19 @@
   - name: Turn off power saving
     ansible.builtin.shell: "pmset -a sleep 0; pmset -a disablesleep 1; pmset -a standby 0; pmset -a autopoweroff 0"
     become: true
+  - name: Turn on AutomaticDownload of updates
+    ansible.builtin.shell: defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -boolean true
+    become: true
+  - name: Turn on CriticalUpdateInstall of updates
+    ansible.builtin.shell: defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -boolean true
+    become: true
+  - name: Turn on AutomaticCheckEnabled of updates
+    ansible.builtin.shell: defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -bool true
+    become: true
+  - name: Turn on AutomaticallyInstallMacOSUpdates of updates
+    ansible.builtin.shell: defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool true
+    become: true
+
 
 - name: Command Line Tools
   hosts: workers
