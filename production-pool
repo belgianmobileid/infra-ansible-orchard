@@ -2,13 +2,17 @@ macs:
   children:
     workers:
       hosts:
-        Mac-Mini-Master-01.local: 
-          ansible_host: 127.0.0.1
+        itsme-prd-office-macmini-m1-01: 
+          ansible_host: 10.210.0.101
+        itsme-prd-office-macmini-m4-01: 
+          ansible_host: 10.210.0.102
+        itsme-prd-office-macmini-m4-02: 
+          ansible_host: 10.210.0.103
 
   vars:
     ansible_user_workers: macmini
     orchard_worker_user: macmini # change if necessary
-    orchard_controller_ip: "10.10.81.200"
+    dns_servers: "10.10.17.4"
     orchard_controller_host: "orchard.prd.itsme.internal"
     orchard_worker_controller_url: https://orchard.prd.itsme.internal:443
     orchard_worker_bootstrap_token: <PLACEHOLDER>

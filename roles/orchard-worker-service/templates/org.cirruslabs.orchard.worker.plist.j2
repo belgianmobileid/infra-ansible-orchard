@@ -18,6 +18,8 @@
       <string>--bootstrap-token</string>
       <string>{{ orchard_worker_bootstrap_token }}</string>
       <string>{{ orchard_worker_controller_url }}</string>
+      <string>--labels</string>
+      <string>hostname={{ ansible_hostname }},processor={{ ansible_processor }}</string>
     </array>
     <key>EnvironmentVariables</key>
     <dict>

@@ -1,12 +1,11 @@
 - hosts: workers
   remote_user: "{{ ansible_user_workers }}"
   tasks:
-  - name: Add controller host url to /etc/hosts
-    ansible.builtin.lineinfile:
-      path: /etc/hosts
-      line: "{{ orchard_controller_ip }} {{ orchard_controller_host }}"
-      regexp: '^.* {{ orchard_controller_host }}$'
-      state: present
+  - name: Set DNS server to azure one
+    ansible.builtin.shell: "networksetup -setdnsservers Ethernet {{ dns_servers }}; networksetup -setsearchdomains Ethernet prd.itsme.internal itsme.internal"
+    become: true
+  - name: Turn off power saving
+    ansible.builtin.shell: "pmset -a sleep 0; pmset -a disablesleep 1; pmset -a standby 0; pmset -a autopoweroff 0"
     become: true
 
 - name: Command Line Tools

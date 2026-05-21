@@ -1,2 +1,2 @@
 [workers]
-Mac-Mini-Master-01.local ansible_host=127.0.0.1
+itsme-prd-office-macmini-m1-01 ansible_host=10.210.0.101
