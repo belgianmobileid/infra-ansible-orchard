@@ -7,6 +7,9 @@
   - name: Turn off power saving
     ansible.builtin.shell: "pmset -a sleep 0; pmset -a disablesleep 1; pmset -a standby 0; pmset -a autopoweroff 0"
     become: true
+  - name: Turn on standby for mac between 1 am and 4 am - mac needs to be in standby for MAC OS updates
+    ansible.builtin.shell: "pmset repeat sleep MTWRFSU 01:00:00 wake MTWRFSU 04:00:00"
+    become: true
   - name: Turn on AutomaticDownload of updates
     ansible.builtin.shell: defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -boolean true
     become: true
