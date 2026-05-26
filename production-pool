@@ -8,6 +8,8 @@ macs:
           ansible_host: 10.210.0.102
         itsme-prd-office-macmini-m4-02: 
           ansible_host: 10.210.0.103
+        itsme-prd-office-macmini-m4-03: 
+          ansible_host: 10.210.0.104
 
   vars:
     ansible_user_workers: macmini
